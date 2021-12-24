@@ -14,15 +14,15 @@ var numberOfRowsRequired = finalTimeInHours - intialTimeInHours + 1;
 function createAndRenderScheduler() {
     for (var i = 0; i < numberOfRowsRequired & i <= maxNumberOfRows; i++) {
         var rowElement = $('<div>');
-        rowElement.attr('class', 'row justify-content-center');
+        rowElement.attr('class', 'row');
         rowElement.attr('id', 'row-' + intialTimeInHours + i);
-        console.log(i + ' : ' + j)
+        // console.log(i + ' : ' + j)
         for (var j = 0; j < 3; j++) {
             // First column as time to be created and populated in deparate 
             var colElement;
             if (j == 0) {
-                colElement = $('<div>');
-                colElement.attr('class', 'col-2 time-block hour');
+                colElement = $('<text>');
+                colElement.attr('class', 'col-1 time-block hour description');
                 colElement.attr('id', 'row-' + intialTimeInHours + i + '-col-' + j);
                 time = intialTimeInHours + i;
                 if ((time % 24) >= 0 & (time % 24) < 12) {
@@ -56,15 +56,22 @@ function createAndRenderScheduler() {
             if (j === 1) {
                 colElement = $('<input>');
                 colElement.attr('type', 'text');
-                colElement.attr('class', 'col-8');
+                colElement.attr('class', 'col-10');
                 colElement.attr('id', 'row-' + intialTimeInHours + i + '-col-' + j);
             }
             if (j === 2) {
-                colElement = $('<input>');
-                colElement.attr('class', 'col-2 saveBtn');
-                colElement.attr('type', 'button');
-                colElement.attr('value', 'Save');
+                colElement = $('<div>');
+                colElement.attr('class', 'col-1 saveBtn');
                 colElement.attr('id', 'row-' + intialTimeInHours + i + '-col-' + j);
+                var colElementDiv = $('<div>');
+                colElementDiv.attr('class', 'row saveButtonEnhanced');
+                var colElementInputImg = $('<input>');
+                colElementInputImg.attr('class', 'col-xs-auto col-sm-auto');
+                colElementInputImg.attr('type', 'image');
+                colElementInputImg.attr('src', './Assets/Images/saveButton.png');
+                colElementInputImg.attr('height', '25px');
+                colElementDiv.append(colElementInputImg);
+                colElement.append(colElementDiv);
             }
             rowElement.append(colElement);
         }
