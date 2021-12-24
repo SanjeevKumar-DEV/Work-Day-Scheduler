@@ -4,22 +4,26 @@ var timeScheduler = $('.container');
 // How many number of time chunks a day should be divided into  
 var maxNumberOfRows = 24;
 // What time of the day should be starting   
-var intialTimeInHours = 9; //24 hours clock Time
-var finalTimeInHours = 17; //24 hours clock Time
-var numberOfRowsRequired  =  finalTimeInHours -  intialTimeInHours + 1;
+//24 hours clock Time. Min Value can be 0 
+var intialTimeInHours = 9;
+//24 hours clock Time. Max value should be 23 
+var finalTimeInHours = 18;
+var numberOfRowsRequired = finalTimeInHours - intialTimeInHours + 1;
 
 // Create time scheduler on the fly
 function createAndRenderScheduler() {
     for (var i = 0; i < numberOfRowsRequired & i <= maxNumberOfRows; i++) {
         var rowElement = $('<div>');
-        rowElement.attr('class', 'row');
+        rowElement.attr('class', 'row justify-content-center');
         rowElement.attr('id', 'row-' + intialTimeInHours + i);
         console.log(i + ' : ' + j)
         for (var j = 0; j < 3; j++) {
-            var colElement = $('<div>');
-            colElement.attr('class', 'col');
-            colElement.attr('id', 'row-' + intialTimeInHours + i + '-col-' + j);
+            // First column as time to be created and populated in deparate 
+            var colElement;
             if (j == 0) {
+                colElement = $('<div>');
+                colElement.attr('class', 'col-2 time-block hour');
+                colElement.attr('id', 'row-' + intialTimeInHours + i + '-col-' + j);
                 time = intialTimeInHours + i;
                 if ((time % 24) >= 0 & (time % 24) < 12) {
                     if (time < 10) {
@@ -42,17 +46,30 @@ function createAndRenderScheduler() {
                         timeToDisplay += ' PM';
 
                     }
-                    else { 
-                    timeToDisplay = time + ' : 00';
-                    timeToDisplay += ' PM';
+                    else {
+                        timeToDisplay = time + ' : 00';
+                        timeToDisplay += ' PM';
+                    }
                 }
+                colElement.text(timeToDisplay);
             }
-            colElement.text(timeToDisplay);
+            if (j === 1) {
+                colElement = $('<input>');
+                colElement.attr('type', 'text');
+                colElement.attr('class', 'col-8');
+                colElement.attr('id', 'row-' + intialTimeInHours + i + '-col-' + j);
+            }
+            if (j === 2) {
+                colElement = $('<input>');
+                colElement.attr('class', 'col-2 saveBtn');
+                colElement.attr('type', 'button');
+                colElement.attr('value', 'Save');
+                colElement.attr('id', 'row-' + intialTimeInHours + i + '-col-' + j);
+            }
+            rowElement.append(colElement);
         }
-        rowElement.append(colElement);
+        timeScheduler.append(rowElement);
     }
-    timeScheduler.append(rowElement);
-}
 };
 
 // Create time scheduler on the fly at when initial page load finished. 
