@@ -7,8 +7,10 @@ var maxNumberOfRows = 24;
 //24 hours clock Time. Min Value can be 0 
 var intialTimeInHours = 9;
 //24 hours clock Time. Max value should be 23 
-var finalTimeInHours = 18;
+var finalTimeInHours = 23;
 var numberOfRowsRequired = finalTimeInHours - intialTimeInHours + 1;
+var currentDayDisplayEl = $('#currentDay');
+
 
 // Create time scheduler on the fly
 function createAndRenderScheduler() {
@@ -16,7 +18,6 @@ function createAndRenderScheduler() {
         var rowElement = $('<div>');
         rowElement.attr('class', 'row');
         rowElement.attr('id', 'row-' + intialTimeInHours + i);
-        // console.log(i + ' : ' + j)
         for (var j = 0; j < 3; j++) {
             // First column as time to be created and populated accordingly for display progressively
             var colElement;
@@ -57,7 +58,17 @@ function createAndRenderScheduler() {
             if (j === 1) {
                 colElement = $('<input>');
                 colElement.attr('type', 'text');
-                colElement.attr('class', 'col-10');
+                // Present Past and Future colour coding handler
+                if (parseInt(moment().format('H')) > (intialTimeInHours + i)) {
+                    colElement.attr('class', 'col-10 future');
+                }
+                else if (parseInt(moment().format('H')) === (intialTimeInHours + i)) {
+                    colElement.attr('class', 'col-10 present');
+                }
+                else
+                {
+                    colElement.attr('class', 'col-10 past');
+                }
                 colElement.attr('id', 'row-' + intialTimeInHours + i + '-col-' + j);
             }
             // Third column to save the neeting text. 
@@ -81,7 +92,22 @@ function createAndRenderScheduler() {
     }
 };
 
+var secondsElapsedSinceAppStarted = 0;
+
+// Function to update time blocks colour every second 
+
+function setTime() {
+    var timerInterval = setInterval(function () {
+        currentDayDisplayEl.text(moment().format("dddd, MMMM Do YYYY, hh:mm:ss a"));
+        if (parseInt(moment().format('mm')) === 0 & parseInt(moment().format('ss')) === 0 ) { 
+            location.reload();
+        }
+        secondsElapsedSinceAppStarted++;
+    }, 1000);
+};
+
 // Create time scheduler on the fly at when initial page load finished. 
 $(document).ready(function (event) {
     createAndRenderScheduler();
+    setTime();
 });
