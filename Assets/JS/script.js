@@ -18,7 +18,7 @@ function createAndRenderScheduler() {
         rowElement.attr('id', 'row-' + intialTimeInHours + i);
         // console.log(i + ' : ' + j)
         for (var j = 0; j < 3; j++) {
-            // First column as time to be created and populated in deparate 
+            // First column as time to be created and populated accordingly for display progressively
             var colElement;
             if (j == 0) {
                 colElement = $('<text>');
@@ -53,12 +53,14 @@ function createAndRenderScheduler() {
                 }
                 colElement.text(timeToDisplay);
             }
+            // Second column for inserting comments about the meeting text
             if (j === 1) {
                 colElement = $('<input>');
                 colElement.attr('type', 'text');
                 colElement.attr('class', 'col-10');
                 colElement.attr('id', 'row-' + intialTimeInHours + i + '-col-' + j);
             }
+            // Third column to save the neeting text. 
             if (j === 2) {
                 colElement = $('<div>');
                 colElement.attr('class', 'col-1 saveBtn');
