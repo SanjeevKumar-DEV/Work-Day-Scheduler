@@ -7,9 +7,28 @@ var maxNumberOfRows = 24;
 //24 hours clock Time. Min Value can be 0 
 var intialTimeInHours = 9;
 //24 hours clock Time. Max value should be 23 
-var finalTimeInHours = 23;
+var finalTimeInHours = 17;
 var numberOfRowsRequired = finalTimeInHours - intialTimeInHours + 1;
 var currentDayDisplayEl = $('#currentDay');
+var initialIdForEventCapture = intialTimeInHours * 10;
+var finalIdForEventCapture = initialIdForEventSave + (finalTimeInHours - intialTimeInHours);
+var initialIdForEventSave = intialTimeInHours;
+var finalIdForEventSave = finalTimeInHours;
+
+// Setting load of events on first load of from the storage
+
+var scheduledEventsForDay = {
+    currentDay,
+    eventsForTheDay: []
+};
+
+if (JSON.parse(localStorage.getItem('dayEventsInStorage')) === null) {
+    scheduledEventsForDay.currentDay = moment().format('D');
+    localStorage.setItem("dayEventsInStorage", JSON.stringify(scheduledEventsForDay));
+}
+else {
+    scheduledEventsForDay = JSON.parse(localStorage.getItem('dayEventsInStorage'));
+}
 
 
 // Create time scheduler on the fly
@@ -58,6 +77,7 @@ function createAndRenderScheduler() {
             if (j === 1) {
                 colElement = $('<input>');
                 colElement.attr('type', 'text');
+                colElement.attr('id', initialIdForEventCapture + i);
                 // Present Past and Future colour coding handler
                 if (parseInt(moment().format('H')) > (intialTimeInHours + i)) {
                     colElement.attr('class', 'col-10 future');
@@ -65,21 +85,25 @@ function createAndRenderScheduler() {
                 else if (parseInt(moment().format('H')) === (intialTimeInHours + i)) {
                     colElement.attr('class', 'col-10 present');
                 }
-                else
-                {
+                else {
                     colElement.attr('class', 'col-10 past');
                 }
-                colElement.attr('id', 'row-' + intialTimeInHours + i + '-col-' + j);
+                for (var k = 0; k < scheduledEventsForDay.eventsForTheDay.length; k++) {
+                    if (scheduledEventsForDay.eventsForTheDay[k].id === (initialIdForEventSave + i)) {
+                        colElement.val(scheduledEventsForDay.eventsForTheDay[k].eventDetail);
+                    }
+                }
+
             }
             // Third column to save the neeting text. 
             if (j === 2) {
                 colElement = $('<div>');
                 colElement.attr('class', 'col-1 saveBtn');
-                colElement.attr('id', 'row-' + intialTimeInHours + i + '-col-' + j);
                 var colElementDiv = $('<div>');
                 colElementDiv.attr('class', 'row saveButtonEnhanced');
                 var colElementInputImg = $('<input>');
                 colElementInputImg.attr('class', 'col-xs-auto col-sm-auto');
+                colElementInputImg.attr('id', initialIdForEventSave + i);
                 colElementInputImg.attr('type', 'image');
                 colElementInputImg.attr('src', './Assets/Images/saveButton.png');
                 colElementInputImg.attr('height', '25px');
@@ -94,13 +118,29 @@ function createAndRenderScheduler() {
 
 var secondsElapsedSinceAppStarted = 0;
 
-// Function to update time blocks colour every second 
+// To Store current list of events in local storage;
+function saveEventsInLocalStorage() {
+    localStorage.setItem("dayEventsInStorage", JSON.stringify(scheduledEventsForDay));
+}
+
+// Previous events and fresh events and stale events are cleared on start of new day. 
+
+function reloadTheEventsOnStartOfNewDay() {
+    localStorage.clear();
+    location.reload();
+}
+
+// Function to update time blocks colour every second and clear the events on start of new day. 
 
 function setTime() {
     var timerInterval = setInterval(function () {
         currentDayDisplayEl.text(moment().format("dddd, MMMM Do YYYY, hh:mm:ss a"));
-        if (parseInt(moment().format('mm')) === 0 & parseInt(moment().format('ss')) === 0 ) { 
+        if (parseInt(moment().format('mm')) === 0 & parseInt(moment().format('ss')) === 0) {
             location.reload();
+        }
+        if (moment().format('D') !== scheduledEventsForDay.currentDay)
+        {
+            reloadTheEventsOnStartOfNewDay();
         }
         secondsElapsedSinceAppStarted++;
     }, 1000);
@@ -111,3 +151,44 @@ $(document).ready(function (event) {
     createAndRenderScheduler();
     setTime();
 });
+
+$('.container').on('click', function (event) {
+    event.preventDefault();
+    var targetId = parseInt(event.target.id);
+    var icrementalTargetId = targetId - initialIdForEventSave;
+    if (targetId >= initialIdForEventSave & targetId <= finalIdForEventSave) {
+        var newEventToSave = $('#' + (initialIdForEventCapture + icrementalTargetId)).val();
+        if (newEventToSave != '') {
+            var eventContent = {
+                id: targetId,
+                eventDetail: newEventToSave
+            };
+            var updateEvent = false;
+            for (var i = 0; ((i < scheduledEventsForDay.eventsForTheDay.length) || i === 0) & !updateEvent; i++) {
+                // Update an exsting event
+                if (scheduledEventsForDay.eventsForTheDay[i] !== null & scheduledEventsForDay.eventsForTheDay.length > 0) {
+                    if (targetId === scheduledEventsForDay.eventsForTheDay[i].id) {
+                        scheduledEventsForDay.eventsForTheDay[i] = eventContent;
+                        updateEvent = true;
+                    }
+                }
+                // Create a new event
+                if ((!updateEvent & scheduledEventsForDay.eventsForTheDay.length === 0) || (!updateEvent & scheduledEventsForDay.eventsForTheDay.length > 0 & i === (scheduledEventsForDay.eventsForTheDay.length - 1))) {
+                    scheduledEventsForDay.eventsForTheDay.push(eventContent);
+                }
+                // Sort the events array when required 
+                if (scheduledEventsForDay !== null & scheduledEventsForDay.eventsForTheDay !== null & scheduledEventsForDay.eventsForTheDay.length > 0) {
+                    if(i === (scheduledEventsForDay.eventsForTheDay.length) - 1)
+                    scheduledEventsForDay.eventsForTheDay.sort(function (a, b) {
+                        return a.id - b.id;
+                    });
+                }
+            }
+            saveEventsInLocalStorage();
+        }
+    }
+
+});
+
+
+
